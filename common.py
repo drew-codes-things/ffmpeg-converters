@@ -34,7 +34,7 @@ def init_log(path, title):
 def print_progress(current, total, filename):
     bar_length = 40
     filled = int(bar_length * current // total)
-    bar = "\u2588" * filled + "-" * (bar_length - filled)
+    bar = "█" * filled + "-" * (bar_length - filled)
     display_name = (filename[:36] + "...") if len(filename) > 39 else filename
     print(f"\r[{bar}] {current}/{total}  {display_name:42}", end="", flush=True)
 
@@ -94,7 +94,6 @@ def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output
         base = os.path.splitext(filename)[0]
         output_file = os.path.join(output_folder, base + "." + output_ext)
 
-        # Skip if output already exists
         if os.path.exists(output_file):
             write_log(log_file, f"[{idx}/{total}] SKIPPED (exists): {output_file}")
             print_progress(idx, total, filename + " [skip]")
@@ -120,7 +119,7 @@ def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output
             write_log(log_file, f"[{idx}/{total}] UNEXPECTED: {e}\n")
             failed.append(filename)
 
-    print()  # newline after progress bar
+    print()
     print(f"\nDone. {ok}/{total} converted successfully.")
     if failed:
         print(f"Failed ({len(failed)}):")
