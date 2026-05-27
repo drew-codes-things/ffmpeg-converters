@@ -15,7 +15,7 @@ No dependencies beyond Python and ffmpeg itself.
 
 ## Usage
 
-Run whichever script matches your media type:
+Download this repo and run whichever script matches your media type:
 
 ```bash
 python audio.py
