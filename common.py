@@ -80,6 +80,17 @@ def prompt_folders(output_folder_override=None):
     if not os.path.isdir(input_folder):
         print(f"ERROR: Input folder not found: {input_folder}")
         return None, None
+    # Resolve to absolute paths before comparing so that e.g. "./foo" and
+    # "foo" are correctly detected as the same directory.
+    abs_in  = os.path.realpath(input_folder)
+    abs_out = os.path.realpath(output_folder)
+    if abs_in == abs_out:
+        print(
+            "WARNING: Input and output folders are the same path. "
+            "This may overwrite or corrupt your source files. "
+            "Please choose a different output folder."
+        )
+        return None, None
     if not os.path.isdir(output_folder):
         print(f"Creating output folder: {output_folder}")
         os.makedirs(output_folder, exist_ok=True)
@@ -121,8 +132,9 @@ def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output
         output_file = os.path.join(output_folder, base + "." + output_ext)
 
         if os.path.exists(output_file):
-            write_log(log_file, f"[{idx}/{total}] SKIPPED (exists): {output_file}")
-            print_progress(idx, total, filename + " [skip]")
+            skip_reason = "output already exists"
+            write_log(log_file, f"[{idx}/{total}] SKIPPED ({skip_reason}): {output_file}")
+            print_progress(idx, total, filename + f" [skip -- {skip_reason}]")
             skipped += 1
             continue
 

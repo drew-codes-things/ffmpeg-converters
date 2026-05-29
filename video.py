@@ -44,10 +44,18 @@ def build_cmd_factory(use_source_bitrate, crf):
     def build_cmd(ffmpeg_path, input_file, output_file):
         ext = os.path.splitext(output_file)[1].lstrip(".")
         vcodec, acodec = FORMATS[ext]
+        is_vp9 = (vcodec == "libvpx-vp9")
         if use_source_bitrate:
+            # For VP9, -b:v 0 enables constant-quality mode (required alongside -crf).
+            # For x264, -b:v 0 is harmless but included for consistency.
             video_args = ["-c:v", vcodec, "-b:v", "0", "-crf", "18"]
         else:
-            video_args = ["-c:v", vcodec, "-crf", str(crf)]
+            if is_vp9:
+                # VP9 CRF only takes effect when -b:v 0 is set; without it
+                # ffmpeg uses VP9's default 256k target bitrate and ignores CRF.
+                video_args = ["-c:v", vcodec, "-b:v", "0", "-crf", str(crf)]
+            else:
+                video_args = ["-c:v", vcodec, "-crf", str(crf)]
         return [
             ffmpeg_path, "-y", "-i", input_file,
             *video_args,
