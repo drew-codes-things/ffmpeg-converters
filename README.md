@@ -5,46 +5,53 @@ A collection of Python scripts that provide a simple wrapper around `ffmpeg.exe`
 ## Technical Approach
 
 - Uses `subprocess` to call `ffmpeg.exe` with pre-built command templates
-- No need to remember complex FFmpeg flags
-- Batch processing support
-- Simple Python interface for common operations
-
-## Supported Operations (Typical)
-
-- Video conversion (MP4 ↔ MKV, etc.)
-- Audio extraction and format conversion (MP3, WAV, AAC)
-- Image format conversion and resizing (PNG, JPG, WebP)
-- Compression presets
-- Thumbnail generation
 
 ## File Structure
 
 ```
 ffmpeg-converters/
-├── main.py                 # Interactive menu or direct script calls
-├── convert_video.py        # Video-specific wrapper
-├── convert_audio.py        # Audio extraction/conversion
+├── main.py
 ├── requirements.txt
 ├── README.md
 └── LICENSE
 ```
 
-## Installation
+## Installation (Recommended: Virtual Environment)
 
-1. Place `ffmpeg.exe` in your PATH or project folder
-2. `pip install -r requirements.txt`
-3. Run `python main.py` or individual scripts
-
-## Usage Example
+### On Linux / macOS
 
 ```bash
-python convert_video.py input.mp4 output.mkv --preset compress
+git clone https://github.com/drew-codes-things/ffmpeg-converters.git
+cd ffmpeg-converters
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### On Windows
+
+```bash
+git clone https://github.com/drew-codes-things/ffmpeg-converters.git
+cd ffmpeg-converters
+
+python -m venv venv
+venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+## Usage
+
+```bash
+python main.py
 ```
 
 ## Requirements
 
 - Python 3.8+
-- FFmpeg (https://ffmpeg.org)
+- FFmpeg installed
 
 ## License
 
