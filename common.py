@@ -27,14 +27,39 @@ def write_log(path, text):
 
 def init_log(path, title):
     with open(path, "w", encoding="utf-8") as log:
-        log.write(f"=== {title} \u2014 Made by Drew ===\n")
+        log.write(f"=== {title} - Made by Drew ===\n")
         log.write(f"Started: {datetime.datetime.now().isoformat(sep=' ', timespec='seconds')}\n\n")
+
+
+def format_size(num_bytes):
+    """Human-readable file size."""
+    for unit in ("B", "KB", "MB", "GB"):
+        if num_bytes < 1024:
+            return f"{num_bytes:.1f} {unit}"
+        num_bytes /= 1024
+    return f"{num_bytes:.1f} TB"
+
+
+def print_size_estimate(files, input_folder):
+    """Print total input size and a rough estimated output size before converting."""
+    total_bytes = sum(
+        os.path.getsize(os.path.join(input_folder, f))
+        for f in files
+        if os.path.isfile(os.path.join(input_folder, f))
+    )
+    # Rough estimate: output is typically 60-90% of input for most lossy conversions.
+    # We show a range rather than a single number to be honest about uncertainty.
+    low  = total_bytes * 0.5
+    high = total_bytes * 1.1
+    print(f"  Total input size :  {format_size(total_bytes)}")
+    print(f"  Estimated output :  {format_size(low)} -> {format_size(high)}  (rough range)")
+    print()
 
 
 def print_progress(current, total, filename):
     bar_length = 40
     filled = int(bar_length * current // total)
-    bar = "\u2588" * filled + "-" * (bar_length - filled)
+    bar = "#" * filled + "-" * (bar_length - filled)
     display_name = (filename[:36] + "...") if len(filename) > 39 else filename
     print(f"\r[{bar}] {current}/{total}  {display_name:42}", end="", flush=True)
 
@@ -81,7 +106,9 @@ def pick_format(formats, log_file):
 
 
 def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output_ext, log_file):
-    """Run ffmpeg on every file, track success/failure/skips, print summary."""
+    """Show estimated output size, then run ffmpeg on every file."""
+    print_size_estimate(files, input_folder)
+
     total = len(files)
     ok = 0
     skipped = 0
