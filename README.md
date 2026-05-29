@@ -16,9 +16,9 @@ ffmpeg-converters/
 └── LICENSE
 ```
 
-## Installation (Recommended: Virtual Environment)
+## Installation
 
-### On Linux / macOS
+### Linux (Recommended - Virtual Environment)
 
 ```bash
 git clone https://github.com/drew-codes-things/ffmpeg-converters.git
@@ -30,14 +30,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### On Windows
+### macOS / Windows (Simple Method)
 
 ```bash
 git clone https://github.com/drew-codes-things/ffmpeg-converters.git
 cd ffmpeg-converters
-
-python -m venv venv
-venv\Scripts\activate
 
 pip install -r requirements.txt
 ```
