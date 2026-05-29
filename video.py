@@ -18,8 +18,21 @@ INPUT_EXTS = {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".m4v", "
 # Quality scale: 1 (smallest/worst) to 5 (largest/best)
 CRF_MAP = {1: 28, 2: 24, 3: 20, 4: 18, 5: 16}
 
+# Sentinel value returned by ask_bitrate_mode() when the user picks 's'.
+# Using a named constant makes the intent obvious at the call site instead
+# of relying on callers to check `q is None`.
+_SOURCE_MODE = object()
+
 
 def ask_bitrate_mode():
+    """
+    Ask the user to pick a quality level or source-bitrate mode.
+
+    Returns one of:
+      - (_SOURCE_MODE, 18)  when the user picks 's' (near-lossless, CRF 18)
+      - (quality_int, crf)  for a numbered quality choice 1-5
+      - (3, 20)             as the default / fallback
+    """
     print("\nVideo quality:")
     print("  s. Use source bitrate (CRF 18 -- near-lossless)")
     print("  1. Quality 1 -- smallest file  (CRF 28)")
@@ -29,7 +42,7 @@ def ask_bitrate_mode():
     print("  5. Quality 5 -- best quality    (CRF 16)")
     raw = input("Choose [s/1-5] [3]: ").strip().lower() or '3'
     if raw == 's':
-        return None, None  # source bitrate -> use CRF 18 lossless-quality
+        return _SOURCE_MODE, 18
     try:
         q = int(raw)
         if 1 <= q <= 5:
@@ -95,7 +108,7 @@ def main():
         sys.exit(1)
 
     q, crf = ask_bitrate_mode()
-    use_source = (q is None)
+    use_source = (q is _SOURCE_MODE)
     if use_source:
         print("Using source bitrate mode (CRF 18).")
         write_log(log_file, "Bitrate mode: source (CRF 18)")
@@ -103,7 +116,7 @@ def main():
         print(f"Using quality {q} (CRF {crf}).")
         write_log(log_file, f"Bitrate mode: quality {q} (CRF {crf})")
 
-    build_cmd = build_cmd_factory(use_source, crf if not use_source else 18)
+    build_cmd = build_cmd_factory(use_source, crf)
     run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output_ext, log_file)
 
 
