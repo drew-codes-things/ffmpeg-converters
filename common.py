@@ -27,14 +27,14 @@ def write_log(path, text):
 
 def init_log(path, title):
     with open(path, "w", encoding="utf-8") as log:
-        log.write(f"=== {title} — Made by Drew ===\n")
+        log.write(f"=== {title} \u2014 Made by Drew ===\n")
         log.write(f"Started: {datetime.datetime.now().isoformat(sep=' ', timespec='seconds')}\n\n")
 
 
 def print_progress(current, total, filename):
     bar_length = 40
     filled = int(bar_length * current // total)
-    bar = "█" * filled + "-" * (bar_length - filled)
+    bar = "\u2588" * filled + "-" * (bar_length - filled)
     display_name = (filename[:36] + "...") if len(filename) > 39 else filename
     print(f"\r[{bar}] {current}/{total}  {display_name:42}", end="", flush=True)
 
@@ -48,12 +48,10 @@ def get_files(folder, extensions):
     return files
 
 
-def prompt_folders(log_file):
+def prompt_folders(output_folder_override=None):
     """Ask for input/output folders, validate, create output if needed."""
     input_folder = clean_path(input("Input folder path: "))
     output_folder = clean_path(input("Output folder path: "))
-    write_log(log_file, f"Input:  {input_folder}")
-    write_log(log_file, f"Output: {output_folder}")
     if not os.path.isdir(input_folder):
         print(f"ERROR: Input folder not found: {input_folder}")
         return None, None
@@ -83,9 +81,10 @@ def pick_format(formats, log_file):
 
 
 def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output_ext, log_file):
-    """Run ffmpeg on every file, track success/failure, print summary."""
+    """Run ffmpeg on every file, track success/failure/skips, print summary."""
     total = len(files)
     ok = 0
+    skipped = 0
     failed = []
 
     import subprocess
@@ -97,7 +96,7 @@ def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output
         if os.path.exists(output_file):
             write_log(log_file, f"[{idx}/{total}] SKIPPED (exists): {output_file}")
             print_progress(idx, total, filename + " [skip]")
-            ok += 1
+            skipped += 1
             continue
 
         print_progress(idx, total, filename)
@@ -120,10 +119,10 @@ def run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output
             failed.append(filename)
 
     print()
-    print(f"\nDone. {ok}/{total} converted successfully.")
+    print(f"\nDone. {ok} converted, {skipped} skipped (already existed), {len(failed)} failed.")
     if failed:
         print(f"Failed ({len(failed)}):")
         for f in failed:
             print(f"  - {f}")
     write_log(log_file, f"\nFinished: {datetime.datetime.now().isoformat(sep=' ', timespec='seconds')}")
-    write_log(log_file, f"Result: {ok}/{total} OK, {len(failed)} failed")
+    write_log(log_file, f"Result: {ok} converted, {skipped} skipped, {len(failed)} failed")

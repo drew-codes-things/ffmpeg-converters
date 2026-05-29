@@ -1,0 +1,9 @@
+# No Python packages required — all modules are stdlib only.
+# ffmpeg must be installed separately and available on your PATH,
+# or placed as ffmpeg/ffmpeg.exe (Windows) / ffmpeg/ffmpeg (Linux/macOS)
+# next to these scripts.
+#
+# Install ffmpeg:
+#   Ubuntu/Debian: sudo apt install ffmpeg
+#   macOS:         brew install ffmpeg
+#   Windows:       https://ffmpeg.org/download.html

@@ -25,7 +25,12 @@ def build_cmd(ffmpeg_path, input_file, output_file):
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    log_file = os.path.join(script_dir, "logs_image.txt")
+
+    input_folder, output_folder = prompt_folders()
+    if not input_folder:
+        sys.exit(1)
+
+    log_file = os.path.join(output_folder, "logs_image.txt")
     init_log(log_file, "Batch Image Converter")
 
     ffmpeg_path = find_ffmpeg(script_dir)
@@ -33,10 +38,8 @@ def main():
         print("ERROR: ffmpeg not found. Install it or put it in ./ffmpeg/")
         sys.exit(1)
     write_log(log_file, f"ffmpeg: {ffmpeg_path}")
-
-    input_folder, output_folder = prompt_folders(log_file)
-    if not input_folder:
-        sys.exit(1)
+    write_log(log_file, f"Input:  {input_folder}")
+    write_log(log_file, f"Output: {output_folder}")
 
     files = get_files(input_folder, INPUT_EXTS)
     if not files:
