@@ -15,21 +15,21 @@ FORMATS = {
 
 INPUT_EXTS = {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".m4v", ".ts", ".vob"}
 
-# Quality scale: 1 (smallest/worst) → 5 (largest/best)
+# Quality scale: 1 (smallest/worst) to 5 (largest/best)
 CRF_MAP = {1: 28, 2: 24, 3: 20, 4: 18, 5: 16}
 
 
 def ask_bitrate_mode():
     print("\nVideo quality:")
-    print("  s. Use source bitrate (CRF 18 — near-lossless)")
-    print("  1. Quality 1 — smallest file  (CRF 28)")
+    print("  s. Use source bitrate (CRF 18 -- near-lossless)")
+    print("  1. Quality 1 -- smallest file  (CRF 28)")
     print("  2. Quality 2                   (CRF 24)")
-    print("  3. Quality 3 — balanced        (CRF 20)")
+    print("  3. Quality 3 -- balanced        (CRF 20)")
     print("  4. Quality 4                   (CRF 18)")
-    print("  5. Quality 5 — best quality    (CRF 16)")
+    print("  5. Quality 5 -- best quality    (CRF 16)")
     raw = input("Choose [s/1-5] [3]: ").strip().lower() or '3'
     if raw == 's':
-        return None, None  # source bitrate → use CRF 18 lossless-quality
+        return None, None  # source bitrate -> use CRF 18 lossless-quality
     try:
         q = int(raw)
         if 1 <= q <= 5:

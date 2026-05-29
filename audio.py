@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 from common import (
     find_ffmpeg, init_log, write_log, prompt_folders,
     get_files, pick_format, run_batch
@@ -15,25 +16,66 @@ FORMATS = {
     "ogg":  ("libvorbis",  "160k"),
 }
 
+FORMAT_KEYS = list(FORMATS.keys())
+
 INPUT_EXTS = {".flac", ".mp3", ".wav", ".aac", ".opus", ".m4a", ".wma", ".ogg", ".m4b"}
 
 
 def build_cmd(ffmpeg_path, input_file, output_file):
     ext = os.path.splitext(output_file)[1].lstrip(".")
     codec, bitrate = FORMATS[ext]
-    cmd = [ffmpeg_path, "-y", "-i", input_file, "-codec:a", codec]
+    cmd = [
+        ffmpeg_path, "-y",
+        "-i", input_file,
+        "-map_metadata", "0",   # preserve tags (artist, album, title, etc.)
+        "-codec:a", codec,
+    ]
     if bitrate:
         cmd.extend(["-b:a", bitrate])
     cmd.append(output_file)
     return cmd
 
 
+def parse_args():
+    p = argparse.ArgumentParser(
+        description="Batch audio converter (wraps ffmpeg).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Examples:\n"
+            "  python audio.py                              # fully interactive\n"
+            "  python audio.py --input /music --output /out --format mp3\n"
+            "  python audio.py -i /music -o /out -f flac\n"
+        ),
+    )
+    p.add_argument("-i", "--input",  default=None,
+                   help="Input folder path (skips interactive prompt)")
+    p.add_argument("-o", "--output", default=None,
+                   help="Output folder path (skips interactive prompt)")
+    p.add_argument("-f", "--format", default=None,
+                   choices=FORMAT_KEYS,
+                   help=f"Output format: {', '.join(FORMAT_KEYS)} (skips interactive prompt)")
+    return p.parse_args()
+
+
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
+    args = parse_args()
 
-    input_folder, output_folder = prompt_folders()
-    if not input_folder:
-        sys.exit(1)
+    # --- resolve folders (CLI or interactive) ---
+    if args.input and args.output:
+        from common import clean_path
+        input_folder  = clean_path(args.input)
+        output_folder = clean_path(args.output)
+        if not os.path.isdir(input_folder):
+            print(f"ERROR: Input folder not found: {input_folder}")
+            sys.exit(1)
+        if not os.path.isdir(output_folder):
+            print(f"Creating output folder: {output_folder}")
+            os.makedirs(output_folder, exist_ok=True)
+    else:
+        input_folder, output_folder = prompt_folders()
+        if not input_folder:
+            sys.exit(1)
 
     log_file = os.path.join(output_folder, "logs_audio.txt")
     init_log(log_file, "Batch Audio Converter")
@@ -53,9 +95,15 @@ def main():
     print(f"Found {len(files)} audio file(s).")
     write_log(log_file, f"Files: {files}")
 
-    output_ext = pick_format(FORMATS, log_file)
-    if not output_ext:
-        sys.exit(1)
+    # --- resolve format (CLI or interactive) ---
+    if args.format:
+        output_ext = args.format
+        write_log(log_file, f"Output format: .{output_ext}")
+        print(f"Output format: {output_ext}")
+    else:
+        output_ext = pick_format(FORMATS, log_file)
+        if not output_ext:
+            sys.exit(1)
 
     run_batch(ffmpeg_path, build_cmd, files, input_folder, output_folder, output_ext, log_file)
 
