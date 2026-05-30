@@ -69,6 +69,17 @@ def main():
         if not os.path.isdir(input_folder):
             print(f"ERROR: Input folder not found: {input_folder}")
             sys.exit(1)
+
+        abs_in  = os.path.realpath(input_folder)
+        abs_out = os.path.realpath(output_folder)
+        if abs_in == abs_out:
+            print(
+                "WARNING: Input and output folders are the same path. "
+                "This may overwrite or corrupt your source files. "
+                "Please choose a different output folder."
+            )
+            sys.exit(1)
+
         if not os.path.isdir(output_folder):
             print(f"Creating output folder: {output_folder}")
             os.makedirs(output_folder, exist_ok=True)
